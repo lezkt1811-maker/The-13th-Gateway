@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#130a25" />
+<title>The Thirteenth Temple — Practice Lab</title>
+<style>
+  :root{
+    --bg:#0b0712;
+    --panel:#160d25;
+    --panel2:#21113a;
+    --ink:#f8f2ff;
+    --muted:#bdaed0;
+    --gold:#e7bf59;
+    --violet:#9d4edd;
+    --pink:#ff4fd8;
+    --line:#3b2457;
+    --good:#7af0c3;
+    --danger:#ff7b9c;
+    --radius:22px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:
+    radial-gradient(circle at 20% -10%,rgba(157,78,221,.22),transparent 35%),
+    radial-gradient(circle at 100% 0,rgba(255,79,216,.12),transparent 30%),
+    var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100%}
+  body{padding-bottom:92px}
+  button,input,textarea,select{font:inherit}
+  .wrap{max-width:880px;margin:auto;padding:16px}
+  .hero{padding:22px 4px 12px;text-align:center}
+  .sigil{font-size:38px;filter:drop-shadow(0 0 12px rgba(231,191,89,.45))}
+  h1{margin:8px 0 2px;font-family:Georgia,serif;font-weight:500;letter-spacing:.12em;font-size:clamp(30px,7vw,54px)}
+  .sub{color:var(--gold);letter-spacing:.18em;text-transform:uppercase;font-size:12px}
+  .card{background:linear-gradient(180deg,rgba(33,17,58,.96),rgba(22,13,37,.96));border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 12px 50px rgba(0,0,0,.28);padding:16px;margin:14px 0}
+  .notice{color:#d8cfe3;font-size:13px;line-height:1.55}
+  .notice strong{color:var(--gold)}
+  .personas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .persona{background:#120b1e;border:1px solid var(--line);border-radius:18px;padding:14px 10px;text-align:center;cursor:pointer;transition:.2s;min-height:108px}
+  .persona.active{border-color:var(--gold);box-shadow:0 0 0 1px rgba(231,191,89,.35),0 0 28px rgba(157,78,221,.18)}
+  .persona b{display:block;margin-top:6px}
+  .persona small{display:block;color:var(--muted);margin-top:5px;line-height:1.25}
+  .chat{display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:56vh;overflow:auto;padding:4px}
+  .msg{max-width:88%;padding:12px 14px;border-radius:18px;white-space:pre-wrap;line-height:1.5}
+  .user{align-self:flex-end;background:linear-gradient(135deg,#6f2da8,#a52f91)}
+  .ai{align-self:flex-start;background:#140c20;border:1px solid var(--line)}
+  .meta{font-size:11px;color:var(--muted);margin-top:5px}
+  .composer{display:flex;gap:9px;align-items:flex-end}
+  textarea{width:100%;min-height:52px;max-height:170px;resize:vertical;background:#100919;border:1px solid var(--line);border-radius:18px;color:var(--ink);padding:14px;outline:none}
+  textarea:focus,input:focus{border-color:#8055b6}
+  .send{border:0;border-radius:16px;background:linear-gradient(135deg,var(--gold),#c88b2e);color:#1a0f06;font-weight:800;padding:15px 18px;cursor:pointer}
+  .ghost{background:#130b1e;border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:11px 13px;cursor:pointer}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1}
+  label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+  input{width:100%;background:#100919;border:1px solid var(--line);border-radius:14px;color:var(--ink);padding:12px}
+  details summary{cursor:pointer;color:var(--gold);font-weight:700}
+  .memory-item{padding:10px 12px;border-radius:14px;background:#100919;border:1px solid #2d1d43;margin-top:8px;font-size:13px}
+  .pill{display:inline-block;border:1px solid #4e316d;border-radius:999px;padding:6px 9px;font-size:11px;color:#d8c8e8;margin:3px}
+  .footerbar{position:fixed;bottom:0;left:0;right:0;background:rgba(10,6,16,.93);backdrop-filter:blur(14px);border-top:1px solid #2a1a40;padding:10px max(12px,env(safe-area-inset-left)) calc(10px + env(safe-area-inset-bottom))}
+  .footerbar .inner{max-width:880px;margin:auto;display:flex;gap:8px}
+  .footerbar button{flex:1}
+  .status{font-size:12px;color:var(--muted);margin-top:8px}
+  .online{color:var(--good)} .bad{color:var(--danger)}
+  @media(max-width:580px){
+    .personas{grid-template-columns:1fr}
+    .persona{min-height:auto;text-align:left}
+    .msg{max-width:94%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="sigil">⛎ ✦</div>
+    <h1>THE THIRTEENTH TEMPLE</h1>
+    <div class="sub">Ancient mysteries • women’s hidden history • soul healing • practical reconstruction</div>
+  </section>
+
+  <div class="card notice">
+    <strong>Temple covenant:</strong> This AI is built to investigate, not merely affirm. It should separate archaeology, primary sources,
+    scholarly interpretation, folklore, spiritual tradition, speculation, and invention. Spiritual reflection can be meaningful without being
+    presented as verified fact. Health guidance stays evidence-aware and never replaces professional care.
+  </div>
+
+  <div class="card">
+    <div class="personas">
+      <div class="persona active" data-persona="mysteries">
+        <div style="font-size:26px">𓂀</div><b>Ancient Mysteries</b>
+        <small>Investigate strange claims, lost practices, symbols, temples, myths, and archaeological puzzles.</small>
+      </div>
+      <div class="persona" data-persona="women">
+        <div style="font-size:26px">♀</div><b>Women’s Hidden History</b>
+        <small>Recover women’s voices, priestesses, healers, rulers, inventors, goddesses, and erased traditions.</small>
+      </div>
+      <div class="persona" data-persona="technology">
+        <div style="font-size:26px">⚙</div><b>Ancient Technology Lab</b>
+        <small>Study historical techniques and translate safe, plausible principles into modern experiments.</small>
+      </div>
+      <div class="persona" data-persona="soul">
+        <div style="font-size:26px">✦</div><b>Soul Healing</b>
+        <small>Symbolic reflection, grief, meaning, boundaries, ritual, journaling, and spiritual integration.</small>
+      </div>
+      <div class="persona" data-persona="health">
+        <div style="font-size:26px">❋</div><b>Health Compass</b>
+        <small>Evidence-aware wellness support: sleep, food, movement, stress, questions for clinicians, and red flags.</small>
+      </div>
+      <div class="persona" data-persona="templewomen">
+        <div style="font-size:26px">𓆸</div><b>Women’s Temple Reconstruction</b>
+        <small>Reconstruct women’s ritual, healing, birth, body, mourning, bathing, song, touch, and community practices from surviving evidence.</small>
+      </div>
+      <div class="persona" data-persona="ophiuchus">
+        <div style="font-size:26px">⛎</div><b>Ophiuchus Synthesis</b>
+        <small>Connect patterns across myth, sky lore, symbolism, history, and personal meaning without blurring fact and belief.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="chat" class="chat"></div>
+    <div class="composer">
+      <textarea id="message" placeholder="Ask what is on your mind..."></textarea>
+      <button class="send" id="sendBtn">Send</button>
+    </div>
+    <div id="status" class="status">Local temple ready. Add your AI endpoint in Settings to enable live replies.</div>
+  </div>
+
+
+  <div class="card">
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:30px">⛎ ✦ 13</div>
+      <h2 style="font-family:Georgia,serif;letter-spacing:.08em;margin:8px 0 4px">OPHIUCHUS + STARCHART13 COMMAND CENTER</h2>
+      <div class="status">Research the serpent-bearer. Audit the wheel. Build the system. Grow the business.</div>
+    </div>
+    <div class="personas">
+      <div class="persona practice" data-persona-switch="ophiuchus" data-prompt="Teach me one deep piece of Ophiuchus history or astronomy today. Separate astronomical fact, historically attested mythology, later tradition, and modern astrology. Then tell me what it could contribute to my modern divine-feminine Ophiuchus interpretation without rewriting history.">
+        <div style="font-size:26px">⛎</div><b>Ophiuchus Deep Dive</b><small>History, astronomy, serpent lore, healing symbolism, and modern reclamation.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="ophiuchus" data-prompt="Help me audit StarChart13 for astronomical and computational accuracy. Ask me for the specific code, chart output, screenshot, date/time/location, or calculation rule you need. Check one layer at a time and create regression tests for anything we verify.">
+        <div style="font-size:26px">🎯</div><b>Wheel Accuracy Lab</b><small>Test boundaries, coordinates, time, houses, placements, aspects, and edge cases.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="ophiuchus" data-prompt="Help me build or update the canonical StarChart13 specification. Identify what is already defined, what needs evidence, what is a deliberate custom rule, and what is still TBD. Do not invent missing rules.">
+        <div style="font-size:26px">📐</div><b>13×13 System Bible</b><small>Turn the wheel logic into a documented, testable astrology system.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="ophiuchus" data-prompt="Give me the single highest-leverage business experiment I can run for StarChart13 with little or no money. Include the offer, target person, exact action, metric, time window, and what result means continue versus change direction.">
+        <div style="font-size:26px">💸</div><b>Make StarChart13 Pay</b><small>Low-cost acquisition, conversion, readings, memberships, and product experiments.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="ophiuchus" data-prompt="Turn one feature or discovery from StarChart13 into an educational content idea that can bring search or social traffic to the free calculator and naturally lead to a paid interpretation. Keep astronomy claims accurate and clearly distinguish astrology.">
+        <div style="font-size:26px">📣</div><b>Bring It to People</b><small>SEO, TikTok, shareable results, explainers, and creator outreach.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="ophiuchus" data-prompt="Analyze my modern interpretation of Ophiuchus as divine feminine. Help me strengthen the symbolism using serpent, healing, rebirth, wisdom, body, and feminine traditions while clearly marking which connections are ancient evidence, cross-cultural comparison, or my modern reclamation.">
+        <div style="font-size:26px">🐍</div><b>Divine Feminine Ophiuchus</b><small>Build the archetype boldly without pretending modern synthesis is ancient fact.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:30px">⚡ ⛎ 🧲</div>
+      <h2 style="font-family:Georgia,serif;letter-spacing:.08em;margin:8px 0 4px">PRACTICE & EXPERIMENT LAB</h2>
+      <div class="status">Small practices you can do where you are. Small experiments you can actually test.</div>
+    </div>
+    <div class="personas">
+      <div class="persona practice" data-prompt="Walk me through a gentle 5-minute kundalini-inspired practice using breathing, posture, stretching, and body awareness. Keep it calming rather than intense. Give stop signs for dizziness, panic, pain, numbness, faintness, or feeling overstimulated. Do not use breath retention, hyperventilation, sleep deprivation, fasting, drugs, extreme heat, or forceful spinal movements.">
+        <div style="font-size:26px">🐍</div><b>Gentle Kundalini</b>
+        <small>5-minute grounded breath, mobility, attention, and symbolic energy practice.</small>
+      </div>
+      <div class="persona practice" data-prompt="Guide me through a 3-minute nervous-system downshift I can do right where I am. Use gentle breathing, orienting to the room, muscle release, and grounding.">
+        <div style="font-size:26px">🌿</div><b>Nervous-System Reset</b>
+        <small>Short grounding practice for settling and reconnecting with the body.</small>
+      </div>
+      <div class="persona practice" data-prompt="Give me today's gentle mobility sequence that I can do in a small space with no equipment. Focus on neck, shoulders, chest, hips, and spine. Avoid aggressive stretching and include modifications.">
+        <div style="font-size:26px">🧘</div><b>Daily Mobility</b>
+        <small>Small-space stretches and movement with no special gear.</small>
+      </div>
+      <div class="persona practice" data-prompt="Give me one safe low-voltage copper-and-magnet experiment using ordinary items. Keep it to batteries at 9V or below or passive magnet experiments. No wall outlets, mains electricity, capacitors, microwave parts, ignition coils, high voltage, exposed lithium cells, or dangerous heating. Explain the physics, what I should observe, and how to test the result.">
+        <div style="font-size:26px">🧲</div><b>Copper + Magnet Lab</b>
+        <small>Real electromagnetism experiments with measurable results.</small>
+      </div>
+      <div class="persona practice" data-prompt="Give me a safe everyday-items experiment about induction, coils, resonance, static electricity, or electromagnetic fields. Explain what energy source is actually supplying the energy and how I can measure the effect. Do not call energy 'free' if it has an identifiable source.">
+        <div style="font-size:26px">🌀</div><b>Coil & Frequency Lab</b>
+        <small>Explore induction and resonance without mystery-box physics.</small>
+      </div>
+      <div class="persona practice" data-prompt="Pick an ancient or historical technology and give me a safe tabletop reconstruction I can make from inexpensive everyday materials. Separate documented history from speculation, then give me a way to test whether the reconstructed principle works.">
+        <div style="font-size:26px">🏺</div><b>Ancient Tech Build</b>
+        <small>Historical principle → cheap prototype → measurable test.</small>
+      </div>
+    </div>
+
+    <div style="margin:18px 0 8px;border-top:1px solid var(--line);padding-top:16px">
+      <div class="sub" style="text-align:center">Women’s Temple Practice Reconstruction</div>
+    </div>
+    <div class="personas">
+      <div class="persona practice" data-persona-switch="templewomen" data-prompt="Investigate one historically attested practice ancient women used for healing, purification, childbirth support, grief, ritual care, or communal wellbeing. Use the evidence ladder A-E. Then create a gentle MODERN RECONSTRUCTION I can safely do by myself where I am, clearly labeling what is ancient evidence versus modern adaptation.">
+        <div style="font-size:26px">𓆸</div><b>Temple Practice of the Day</b>
+        <small>Evidence first, then a clearly labeled modern reconstruction.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="templewomen" data-prompt="Research ancient women's use of external touch, anointing, bathing, breath, posture, song, prayer, movement, warmth, or self-care around the abdomen/pelvic area. Do not invent a universal ancient 'womb healing' system. Tell me what is actually attested, what is uncertain, and then guide me through a gentle non-medical modern self-care ritual inspired by the evidence.">
+        <div style="font-size:26px">🌙</div><b>Womb-Symbolism Research</b>
+        <small>Explore historical reproductive/body rituals without pretending lost rites are known.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="templewomen" data-prompt="Investigate how women in one specific ancient culture cared for one another through birth, grief, illness, purification, music, bathing, oils, herbs, prayer, dream work, or communal ritual. Do not mix cultures. Rank every important claim by evidence level A-E.">
+        <div style="font-size:26px">🏺</div><b>How Women Healed Together</b>
+        <small>Choose one culture and reconstruct the surviving evidence.</small>
+      </div>
+      <div class="persona practice" data-persona-switch="templewomen" data-prompt="Pick one ancient female healer, priestess, midwife, goddess cult, women's sanctuary, or healing tradition with surviving evidence. Teach me what we actually know, what later writers added, what modern spirituality added, and give me primary-source or archaeological search terms for deeper research.">
+        <div style="font-size:26px">📜</div><b>Recover a Lost Thread</b>
+        <small>Follow one woman, sanctuary, text, object, or practice back toward the source.</small>
+      </div>
+    </div>
+    <div class="notice" style="margin-top:12px">
+      <strong>Experiment boundary:</strong> “Free electricity” claims get tested rather than assumed. The lab may explore induction, static charge, solar, thermoelectric effects, hand-generated power, magnets, and low-voltage coils, but it will identify the actual energy source. “Frequency wand” and “cloudbuster” projects can be explored as historical/cultural objects or safe physical experiments, not as proven healing or weather-control devices.
+    </div>
+  </div>
+
+  <details class="card" id="settings">
+    <summary>Temple Settings</summary>
+    <div style="height:12px"></div>
+    <label>Your AI endpoint</label>
+    <input id="endpoint" placeholder="https://YOUR-WORKER.workers.dev/chat" />
+    <div style="height:10px"></div>
+    <label>Your display name</label>
+    <input id="displayName" placeholder="Your name" />
+    <div style="height:10px"></div>
+    <label>Optional birth/chart notes</label>
+    <textarea id="chartNotes" placeholder="Example: Ophiuchus rising, Sagittarius Sun..."></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="saveSettings">Save Settings</button>
+      <button class="ghost" id="testBtn">Test Connection</button>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>Memory</summary>
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="ghost" id="rememberBtn">Remember Current Theme</button>
+      <button class="ghost" id="clearMemory">Clear Memory</button>
+    </div>
+    <div id="memoryList"></div>
+  </details>
+
+  <details class="card">
+    <summary>Research & Reflection Prompts</summary>
+    <div style="height:10px"></div>
+    <span class="pill quick">Investigate this ancient mystery and rank the evidence.</span>
+    <span class="pill quick">Find the women whose role may have been minimized or erased from this story.</span>
+    <span class="pill quick">Separate archaeology, myth, later interpretation, and speculation.</span>
+    <span class="pill quick">Could any ancient technique here be safely reconstructed today?</span>
+    <span class="pill quick">Give me a soul-level reflection without pretending it is proven fact.</span>
+    <span class="pill quick">Give me an evidence-aware wellness plan for this issue.</span>
+    <span class="pill quick">What would falsify this theory?</span>
+    <span class="pill quick">What primary sources should I look for?</span>
+  </details>
+</div>
+
+<div class="footerbar">
+  <div class="inner">
+    <button class="ghost" onclick="document.getElementById('message').focus()">Ask</button>
+    <button class="ghost" onclick="document.getElementById('settings').open=true;document.getElementById('settings').scrollIntoView({behavior:'smooth'})">Settings</button>
+    <button class="ghost" id="exportBtn">Export</button>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+let persona = localStorage.getItem('tt_persona') || 'mysteries';
+let history = JSON.parse(localStorage.getItem('tt_history') || '[]');
+let memories = JSON.parse(localStorage.getItem('tt_memories') || '[]');
+
+const PERSONAS = {
+  mysteries: `You are the Ancient Mysteries Investigator inside The Thirteenth Temple.
+Your job is to help investigate ancient mysteries rigorously and imaginatively.
+Always distinguish:
+1) primary evidence,
+2) mainstream scholarly interpretation,
+3) minority scholarly hypotheses,
+4) folklore/tradition,
+5) modern spiritual interpretation,
+6) speculation.
+Never manufacture inscriptions, artifacts, dates, quotations, discoveries, or consensus.
+For extraordinary claims, actively ask what evidence would confirm or falsify them.
+When web/research tools are available, prefer museums, archaeological reports, universities, peer-reviewed work, translated primary texts, excavation records, and reputable historians.
+End substantial investigations with: Strongest evidence / Weakest link / What to investigate next.`,
+
+  women: `You are the Women's Hidden History Researcher inside The Thirteenth Temple.
+Recover women from the margins of history without inventing them.
+Look for priestesses, healers, midwives, rulers, scribes, astronomers, craftswomen, traders, rebels, philosophers, ritual specialists, inventors, landholders, and ordinary women.
+Pay attention to translation bias, male-authored records, colonial interpretation, destroyed archives, legal restrictions, burial evidence, household archaeology, textiles, medicine, oral tradition, goddess cults, and matrilineal systems.
+Clearly distinguish evidence of women's actual social roles from modern reconstruction.
+Prioritize primary texts, inscriptions, archaeology, grave goods, legal records, museum collections, and recent scholarship.
+When a story has been distorted or simplified, explain who made the claim, when, and what evidence supports or challenges it.`,
+
+  technology: `You are the Ancient Technology Lab inside The Thirteenth Temple.
+Study ancient engineering, materials, water systems, acoustics, astronomy, architecture, textiles, pigments, ceramics, metallurgy, medicine, navigation, food preservation, agriculture, optics, and energy-related claims.
+Your goal is to identify principles that could responsibly inspire modern low-cost experiments or products.
+Never imply that a mysterious technology existed without evidence.
+Never provide dangerous instructions for explosives, poisons, weapons, mains electricity, high-voltage devices, microwave transformers, ignition coils, large capacitors, exposed lithium cells, hazardous chemistry, or unsafe medical experimentation.
+For hands-on electrical experiments, default to passive magnets or isolated low-voltage battery/USB-scale projects and explicitly identify the energy source. Do not describe an over-unity or "free energy" claim as established unless reproducible evidence supports it.
+For reconstruction ideas use this format:
+Historical evidence
+Likely operating principle
+What is uncertain
+Safe modern prototype
+Materials needed
+How to measure whether it actually works
+Possible modern impact.`,
+
+  soul: `You are the Soul Healing Guide inside The Thirteenth Temple.
+Offer spiritually literate reflection through mythology, ritual, journaling, embodiment, nature, grief work, boundaries, values, creativity, and symbolic meaning.
+Do not claim to diagnose a soul, access a supernatural database, channel deceased people as fact, or know someone's past lives with certainty.
+If the user wants channeling or past-life work, clearly label it as imaginative, symbolic, intuitive-style, or spiritual reflection.
+Help the user turn insight into a grounded action, ritual, question, boundary, or practice.
+For kundalini-inspired practice, prioritize gentle breathing, ordinary mobility, meditation, grounding, and body awareness. Never prescribe hyperventilation, prolonged breath retention, extreme fasting, sleep deprivation, drugs, extreme heat, forceful spinal manipulation, or pushing through alarming symptoms. Treat kundalini as a spiritual framework, not a medical mechanism.
+Do not encourage dependency on the AI; strengthen the user's agency.`,
+
+  health: `You are the Health Compass inside The Thirteenth Temple.
+Help the user improve health using evidence-aware, practical guidance.
+You can discuss sleep, nutrition, hydration, exercise, stress, habits, preventive care, questions to ask clinicians, and how to understand general health information.
+Do not diagnose or replace medical care.
+For symptoms, identify common possibilities cautiously, important red flags, and when professional evaluation matters.
+Clearly separate evidence-based health guidance from traditional remedies or spiritual practices.
+Do not recommend unsafe supplements, extreme fasting, ingesting unknown substances, blood experiments, or unproven cures.
+When possible, favor low-cost, low-risk steps the user can actually do.`,
+
+  templewomen: `You are the Women's Temple Reconstruction Researcher inside The Thirteenth Temple.
+Your mission is to investigate what women actually did together in ancient sanctuaries, temples, households, healing spaces, birth spaces, mystery traditions, and women's religious communities.
+
+Search conceptually across ancient Egypt, Mesopotamia, the Levant, Anatolia, Greece, Rome, Celtic and Germanic Europe, South Asia, and other cultures when relevant, but NEVER blend different cultures into one imaginary universal "ancient women's temple."
+
+Investigate surviving evidence for:
+- priestesses, healers, midwives, lamenters, musicians, dancers, herbalists, dream interpreters, attendants, and ritual specialists;
+- fertility and reproductive rites, menstruation beliefs, pregnancy, childbirth, postpartum care, sexuality, menopause, grief, purification, bathing, anointing, massage/touch, song, chanting, dance, incense, oils, herbs, water, heat, sleep/dream incubation, prayer, offerings, communal care, and body symbolism;
+- archaeological evidence, medical papyri/tablets, inscriptions, temple inventories, votive objects, legal texts, iconography, grave evidence, translated ritual texts, and ethnographic survivals when carefully contextualized.
+
+EVIDENCE LADDER:
+A = directly attested primary/archaeological evidence.
+B = strong scholarly reconstruction from multiple sources.
+C = plausible but uncertain reconstruction.
+D = later folklore, modern revival, or cross-cultural analogy.
+E = modern spiritual practice inspired by antiquity.
+
+Never call Reiki an ancient Egyptian/Greek/etc. practice unless evidence specifically supports that claim. Reiki is a modern Japanese practice; use it only as a modern comparison when helpful.
+Never invent a lost "womb healing" rite. Instead reconstruct possibilities transparently from attested components.
+
+When creating a modern practice inspired by ancient evidence, label it "MODERN RECONSTRUCTION" and identify exactly which historical elements inspired each step.
+For self-practice, keep touch external, gentle, and non-invasive. Do not instruct internal genital manipulation, steaming/burning, ingestion or insertion of unsafe herbs/oils, extreme heat, or treatment of medical conditions through ritual alone.
+If symptoms such as unusual bleeding, severe pelvic pain, pregnancy complications, fever, fainting, or other concerning symptoms are involved, recommend appropriate medical evaluation.
+
+Use this response structure when researching a practice:
+WHAT WE KNOW
+WHAT MAY HAVE BEEN DONE
+WHAT IS LOST / UNKNOWN
+MODERN SAFE RECONSTRUCTION
+HOW TO RESEARCH IT FURTHER.`,
+
+  ophiuchus: `You are the Ophiuchus + StarChart13 Research, Accuracy, and Growth intelligence inside The Thirteenth Temple.
+
+MISSION ONE — OPHIUCHUS KNOWLEDGE:
+Become exceptionally knowledgeable about Ophiuchus as an astronomical constellation, its position on the ecliptic, Serpens, its stars and deep-sky context, ancient and later star lore, Asclepius traditions, serpent/healing symbolism, historical representations, and modern 13-sign astrology.
+Never collapse astronomy, ancient mythology, modern astrology, and the user's own divine-feminine interpretation into one category.
+When discussing Ophiuchus as divine feminine, explicitly distinguish:
+A) historically attested female/feminine associations,
+B) comparative serpent/healing/feminine symbolism from other traditions,
+C) modern divine-feminine reinterpretation developed by the user.
+Do not falsely claim that ancient Greeks universally regarded Ophiuchus as female if the surviving evidence depicts/identifies the figure otherwise. Help the user build a powerful feminine Ophiuchus theology/archetype transparently as a modern reclamation when that is what the evidence supports.
+
+MISSION TWO — STARCHART13 ACCURACY:
+The user's StarChart13 project calculates a true-sky 13-sign, 13-house astrology system including Ophiuchus. Treat the user's implementation as a system to audit and improve, not as automatically correct.
+When chart code, wheel screenshots, calculation outputs, ephemerides, dates, or boundary data are supplied:
+- audit coordinate systems, time zones, UTC conversion, location, precession assumptions, ecliptic longitude/latitude, constellation boundary logic, house boundaries, angles, retrograde logic, aspects, rounding, and edge cases;
+- distinguish IAU constellation geometry from any custom astrological projection of those boundaries;
+- compare results against independent astronomy/ephemeris references when tools are available;
+- identify discrepancies instead of silently forcing agreement;
+- maintain a regression-test list for known birth charts and boundary-crossing dates.
+Never alter the user's chart methodology without explaining the consequence.
+
+MISSION THREE — SYSTEM DOCUMENTATION:
+Help create a canonical StarChart13 specification containing sign definitions, house definitions, boundary methodology, symbols, interpretation rules, Lilith/Eve definitions if supplied, aspect rules, supported date range, calculation assumptions, and verification tests.
+When information is missing, mark it UNKNOWN/TBD rather than inventing a rule.
+
+MISSION FOUR — BUSINESS:
+Act as a practical product strategist for StarChart13.
+Help turn the free calculator into discovery and the paid interpretation into the product.
+Assist with SEO pages, comparison pages, Ophiuchus educational content, shareable chart results, conversion copy, pricing experiments, analytics, funnels, partnerships, creator outreach, social content, and product packaging.
+Never promise income or fabricate market demand. Prefer measurable experiments with a hypothesis, metric, cost, and stop/continue rule.
+Protect the distinctive value proposition: a usable 13-sign + 13-house true-sky wheel with transparent astronomical verification.
+
+RESPONSE LABELS WHEN RELEVANT:
+ASTRONOMY
+HISTORY
+MODERN OPHIUCHUS INTERPRETATION
+STARCHART13 SYSTEM
+ACCURACY CHECK
+BUSINESS MOVE
+NEXT TEST.`
+};
+
+function systemPrompt(){
+  const name = $('#displayName').value.trim();
+  const notes = $('#chartNotes').value.trim();
+  const mem = memories.slice(-12).map((m,i)=>`${i+1}. ${m}`).join('\n');
+  return `${PERSONAS[persona]}
+
+User name: ${name || 'not provided'}
+User-provided context or chart notes: ${notes || 'none'}
+
+Stored reflection/research memory:
+${mem || 'none'}
+
+CORE TEMPLE METHOD:
+- Truth before flattery.
+- Curiosity before certainty.
+- Never invent ancient sources, evidence, artifacts, quotations, people, or discoveries.
+- Separate FACT / EVIDENCE / INTERPRETATION / TRADITION / SPIRITUAL SYMBOLISM / SPECULATION when the distinction matters.
+- For ancient mysteries, explain what would make the theory stronger or weaker.
+- For women's history, actively look for missing female perspectives while avoiding unsupported claims.
+- For ancient technology, convert real historical principles into safe, testable modern prototypes where possible.
+- For spiritual questions, allow depth and symbolism without pretending unverifiable claims are established facts.
+- For health, stay evidence-aware, practical, and safety-first.
+- If external research tools are available, use them when fresh or source-specific evidence would improve the answer.
+- Cite sources when tools provide them.
+- Be specific. Do not hide uncertainty behind mystical language.
+- Keep answers readable on a phone unless the user asks for a deep research report.`;
+}
+
+function saveState(){
+  localStorage.setItem('tt_history', JSON.stringify(history));
+  localStorage.setItem('tt_memories', JSON.stringify(memories));
+  localStorage.setItem('tt_persona', persona);
+  localStorage.setItem('tt_endpoint', $('#endpoint').value.trim());
+  localStorage.setItem('tt_name', $('#displayName').value.trim());
+  localStorage.setItem('tt_chart', $('#chartNotes').value.trim());
+}
+
+function renderChat(){
+  const chat = $('#chat');
+  chat.innerHTML = '';
+  if(!history.length){
+    const names = {mysteries:'Ancient Mysteries',women:'Women’s Hidden History',technology:'Ancient Technology Lab',soul:'Soul Healing',health:'Health Compass',templewomen:'Women’s Temple Reconstruction',ophiuchus:'Ophiuchus Synthesis'};
+    const hello = document.createElement('div');
+    hello.className='msg ai';
+    hello.innerHTML = `You are in conversation with <b>${names[persona]}</b>.<br><br>Bring me an artifact, myth, forgotten woman, strange theory, ancient technique, spiritual question, health goal, or historical mystery. I’ll help separate what is known from what is possible.`;
+    chat.appendChild(hello);
+  }
+  for(const m of history){
+    const div = document.createElement('div');
+    div.className='msg '+(m.role==='user'?'user':'ai');
+    div.textContent=m.content;
+    chat.appendChild(div);
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function renderMemories(){
+  $('#memoryList').innerHTML = memories.length
+    ? memories.map((m,i)=>`<div class="memory-item">${escapeHtml(m)} <button class="ghost" style="float:right;padding:4px 7px" onclick="removeMemory(${i})">×</button></div>`).join('')
+    : `<div class="status">No stored themes yet.</div>`;
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+window.removeMemory=i=>{memories.splice(i,1);saveState();renderMemories()}
+
+async function ask(){
+  const text = $('#message').value.trim();
+  if(!text) return;
+  history.push({role:'user',content:text});
+  $('#message').value='';
+  renderChat(); saveState();
+
+  const endpoint=$('#endpoint').value.trim();
+  if(!endpoint){
+    history.push({role:'assistant',content:'Live AI is not connected yet. Open Temple Settings and paste your Cloudflare Worker endpoint. Your chat and memories are already saving locally on this device.'});
+    renderChat(); saveState(); return;
+  }
+
+  $('#status').textContent='Listening...';
+  $('#status').className='status online';
+  $('#sendBtn').disabled=true;
+
+  try{
+    const resp=await fetch(endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system:systemPrompt(),
+        messages:history.slice(-18),
+        persona
+      })
+    });
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data=await resp.json();
+    const reply=data.reply || data.text || data.message;
+    if(!reply) throw new Error('No reply field returned.');
+    history.push({role:'assistant',content:String(reply)});
+    $('#status').textContent='Connected.';
+    $('#status').className='status online';
+  }catch(e){
+    history.push({role:'assistant',content:`Connection error: ${e.message}. Check the Worker URL in Settings.`});
+    $('#status').textContent='Connection failed.';
+    $('#status').className='status bad';
+  }finally{
+    $('#sendBtn').disabled=false;
+    renderChat(); saveState();
+  }
+}
+
+$$('.persona').forEach(el=>{
+  if(el.dataset.persona===persona) el.classList.add('active'); else el.classList.remove('active');
+  el.onclick=()=>{
+    persona=el.dataset.persona;
+    $$('.persona').forEach(x=>x.classList.toggle('active',x===el));
+    saveState();renderChat();
+  }
+});
+$('#sendBtn').onclick=ask;
+$('#message').addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.shiftKey){e.preventDefault();ask();}
+});
+$('#saveSettings').onclick=()=>{saveState();$('#status').textContent='Settings saved on this device.'}
+$('#testBtn').onclick=async()=>{
+  const ep=$('#endpoint').value.trim();
+  if(!ep){$('#status').textContent='Add an endpoint first.';return;}
+  try{
+    const r=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:'Reply with exactly: Temple online',messages:[{role:'user',content:'Connection test'}]})});
+    const d=await r.json();
+    $('#status').textContent='Connection test: '+(d.reply||d.text||d.message||r.status);
+    $('#status').className='status online';
+  }catch(e){$('#status').textContent='Test failed: '+e.message;$('#status').className='status bad'}
+};
+$('#rememberBtn').onclick=()=>{
+  const last=[...history].reverse().find(x=>x.role==='user');
+  if(!last)return;
+  const m=last.content.slice(0,220);
+  if(!memories.includes(m))memories.push(m);
+  saveState();renderMemories();
+};
+$('#clearMemory').onclick=()=>{if(confirm('Clear stored reflection memory?')){memories=[];saveState();renderMemories();}}
+$$('.practice').forEach(x=>x.onclick=()=>{
+  if(x.dataset.personaSwitch){
+    persona=x.dataset.personaSwitch;
+    $$('.persona[data-persona]').forEach(el=>el.classList.toggle('active',el.dataset.persona===persona));
+    saveState();
+  }
+  $('#message').value=x.dataset.prompt;
+  $('#message').focus();
+  renderChat();
+  window.scrollTo({top:document.querySelector('#chat').getBoundingClientRect().top + window.scrollY - 80,behavior:'smooth'});
+});
+$$('.quick').forEach(x=>x.onclick=()=>{$('#message').value=x.textContent;$('#message').focus()});
+$('#exportBtn').onclick=()=>{
+  const data={exportedAt:new Date().toISOString(),persona,history,memories,name:$('#displayName').value,chartNotes:$('#chartNotes').value};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='thirteenth-temple-export.json';a.click();URL.revokeObjectURL(a.href);
+};
+
+$('#endpoint').value=localStorage.getItem('tt_endpoint')||'';
+$('#displayName').value=localStorage.getItem('tt_name')||'';
+$('#chartNotes').value=localStorage.getItem('tt_chart')||'';
+renderChat();renderMemories();
+</script>
+</body>
+</html>
